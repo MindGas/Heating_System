@@ -6,7 +6,7 @@
  Forked/reworked from [GitHub Gist prairiesnpr/water_heater.ino](https://gist.github.com/prairiesnpr/7a40b78e765044252a4799d328327f0a)
  
  ## Known Issues and Work List
- - [x] ~~Sending Endpoint temperature values fails with code 21 = Network ACK failure.~~(Fixed)
+ - [x] ~~Sending Endpoint temperature values fails with code 21 = Network ACK failure.~~ (Fixed)
  - [x] ~~On/Off switch endpoint not tested, presuming not functioning.~~ (Implemented and tested)
  - [ ] Improve initialization (pairing) logic. Basic Cluster attribute sent twice.
  - [ ] Relay safety feature. Turn off relays if no status update within 1 minute.
@@ -48,8 +48,8 @@ Debugging output in Arduino Serial Monitor
 ![Serial Monitor](https://github.com/MindGas/Heating_System/blob/main/images/SerialMonitor-DebuggingInfo.jpg?raw=true)
  
  ## Good To Know
- * Disconnect TX/RX lines between XBee and Uno when uploading scetch
- * If using Arduino Serial Monitor don't forget to switch port to Nano port after uploading scetch to Uno.
+ * Disconnect TX/RX lines between XBee and Uno when uploading sketch
+ * If using Arduino Serial Monitor don't forget to switch port to Nano port after uploading sketch to Uno.
  * Disconnect TX/RX lines between XBee and Uno when configuring XBee over XCTU
  
  ## Would Not Be Possible Without
