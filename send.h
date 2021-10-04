@@ -33,7 +33,7 @@ void sendDevAnnounce() {
   last_command = &sendDevAnnounce;
 
   exp_tx = ZBExplicitTxRequest(COORDINATOR64, //address64
-                               0xFFFE, //address16
+                               UKN_NET_ADDR, //0xFFFE, //address16
                                0x00,    //broadcast radius
                                0x00,    //option
                                payload, //payload
@@ -48,7 +48,7 @@ void sendDevAnnounce() {
   xbee.send(exp_tx);
 
   if (DEBUG) {
-    nss.print(F("Sent Device Announcment Frame: "));
+    nss.print(F("<- Sent Device Announcment Frame: "));
     print_hex(payload, sizeof(payload));
     nss.println();
   }
@@ -96,7 +96,7 @@ void sendActiveEpResp() {
   xbee.send(exp_tx);
 
   if (DEBUG) {
-    nss.print(F("Sent Active Endpoint Responce: "));
+    nss.print(F("<- Sent Active Endpoint Responce: "));
     print_hex(payload, sizeof(payload));
     nss.println();
   }
@@ -152,40 +152,11 @@ void sendSimpleDescRpt(uint8_t ep) {
   uint8_t payload_len = pre_len + out_len + in_len;
   uint8_t in_clusters[in_len];
 
-  if (DEBUGlv2) {
-  nss.print(F("cmd_seq_id: "));
-  nss.println(cmd_seq_id, HEX);
-  nss.print(F("cmd_frame_id: "));
-  nss.println(cmd_frame_id, HEX); 
-  nss.print(F("num_out: "));
-  nss.println(num_out, HEX);
-  nss.print(F("out_len: "));
-  nss.println(out_len, HEX);
-  nss.print(F("num_in: "));
-  nss.println(num_in, HEX);
-  nss.print(F("in_len: "));
-  nss.println(in_len, HEX); 
-  nss.print(F("pre_len: "));
-  nss.println(pre_len, HEX);
-  nss.print(F("payload_len: "));
-  nss.println(payload_len, HEX);
-  
-  nss.print(F("   pre: "));
-  print_hex(pre, sizeof(pre));
-  nss.println("");
-  }
-
   memcpy(t_payload, pre, pre_len);
 
   uint16_t in_cl[num_in];
   ENDPOINTS[(ep - 1)].GetInClusters(in_cl);
   build_payload_list(in_cl, 2 * num_in, in_clusters);
-
-  if (DEBUGlv2) {
-    nss.print(F("   in_clusters: "));
-    print_hex(in_clusters, sizeof(in_clusters));
-    nss.println("");
-  }
 
   memcpy(t_payload + pre_len , in_clusters, sizeof(in_clusters));
 
@@ -193,12 +164,6 @@ void sendSimpleDescRpt(uint8_t ep) {
   uint16_t out_cl[num_out];
   ENDPOINTS[(ep - 1)].GetOutClusters(out_cl);
   build_payload_list(out_cl, 2 * num_out, out_clusters);
-
-  if (DEBUGlv2) {
-    nss.print(F("   out_clusters: "));
-    print_hex(out_clusters, sizeof(out_clusters));
-    nss.println("");
-  }
 
   memcpy(t_payload + pre_len + sizeof(in_clusters) , out_clusters, sizeof(out_clusters));
 
@@ -218,11 +183,40 @@ void sendSimpleDescRpt(uint8_t ep) {
   xbee.send(exp_tx);
 
   if (DEBUG) {
-    nss.print(F("Sent Simple Descriptor Responce for EP "));
+    nss.print(F("<- Sent Simple Descriptor Responce for EP "));
     nss.print(ep, HEX);
     nss.print(F(": "));
     print_hex(t_payload, payload_len);
     nss.println("");
+
+    if (DEBUGlv2) {
+      nss.print(F("     cmd_seq_id: "));
+      nss.println(cmd_seq_id, HEX);
+      nss.print(F("     cmd_frame_id: "));
+      nss.println(cmd_frame_id, HEX); 
+      nss.print(F("     num_out: "));
+      nss.println(num_out, HEX);
+      nss.print(F("     out_len: "));
+      nss.println(out_len, HEX);
+      nss.print(F("     num_in: "));
+      nss.println(num_in, HEX);
+      nss.print(F("     in_len: "));
+      nss.println(in_len, HEX); 
+      nss.print(F("     pre_len: "));
+      nss.println(pre_len, HEX);
+      nss.print(F("     payload_len: "));
+      nss.println(payload_len, HEX);
+      
+      nss.print(F("     pre: "));
+      print_hex(pre, sizeof(pre));
+      nss.println();
+      nss.print(F("     in_clusters: "));
+      print_hex(in_clusters, sizeof(in_clusters));
+      nss.println();
+      nss.print(F("     out_clusters: "));
+      print_hex(out_clusters, sizeof(out_clusters));
+      nss.println();
+    }
   }
 }
 
@@ -275,7 +269,7 @@ void sendAttributeWriteRsp(uint16_t cluster_id, attribute* attr, uint8_t src_ep,
   if (attr->type != 0) {
     xbee.send(exp_tx);
     if (DEBUG) {
-      nss.println(F("Sent Attr Write Rsp"));
+      nss.println(F("<- Sent Attr Write Rsp"));
     }
   }
 }
@@ -302,7 +296,7 @@ void sendAttributeRpt(uint16_t cluster_id, attribute* attr, uint8_t src_ep, uint
     payload_len = 7 + attr->val_len;
     uint8_t pre[] = {0x00, 
                      cmd_seq_id,
-                     0x0A, //Read attr resp
+                     0x0A, //Report attr 
                      static_cast<uint8_t>((attr->id & 0x00FF) >> 0),
                      static_cast<uint8_t>((attr->id & 0xFF00) >> 8),
                      attr->type,
@@ -319,6 +313,7 @@ void sendAttributeRpt(uint16_t cluster_id, attribute* attr, uint8_t src_ep, uint
                      static_cast<uint8_t>((attr->id & 0x00FF) >> 0),
                      static_cast<uint8_t>((attr->id & 0xFF00) >> 8),
                      attr->type,
+                     //attr->val_len,
                     };
     memcpy(t_payload, pre, sizeof(pre));
     memcpy(t_payload + 6, attr->value, attr->val_len);
@@ -327,7 +322,7 @@ void sendAttributeRpt(uint16_t cluster_id, attribute* attr, uint8_t src_ep, uint
   cmd_frame_id = xbee.getNextFrameId();
 
   exp_tx = ZBExplicitTxRequest(COORDINATOR64,
-                               COORDINATOR_NWK,
+                               UKN_NET_ADDR, //COORDINATOR_NWK,
                                0x00,    //broadcast radius
                                0x00,    //option
                                t_payload, //payload
@@ -342,24 +337,26 @@ void sendAttributeRpt(uint16_t cluster_id, attribute* attr, uint8_t src_ep, uint
   if (attr->type != 0) {
     xbee.send(exp_tx);
     if (DEBUG) {
-      nss.print(F("cluster_id: "));
-      nss.println(cluster_id, HEX);
-      nss.print(F("attr->id: "));
-      nss.println(attr->id, HEX);
-      nss.print(F("attr->type: "));
-      nss.println(attr->type, HEX);
-      nss.print(F("attr->val_len: "));
-      nss.println(attr->val_len, HEX);
-      nss.print(F("attr->value: "));
-      print_hex(attr->value, attr->val_len);
-      nss.println();
-      nss.print(F("src_ep: "));
-      nss.println(src_ep, HEX);
-      nss.print(F("dst_ep: "));
-      nss.println(dst_ep, HEX);
-      nss.print(F("Sent Attribute Report: "));
+      nss.print(F("<- Sent Attribute Report: "));
       print_hex(t_payload, payload_len);
       nss.println();
+    }
+    if (DEBUGlv2) {
+      nss.print(F("     cluster_id: "));
+      nss.println(cluster_id, HEX);
+      nss.print(F("     attr->id: "));
+      nss.println(attr->id, HEX);
+      nss.print(F("     attr->type: "));
+      nss.println(attr->type, HEX);
+      nss.print(F("     attr->val_len: "));
+      nss.println(attr->val_len, HEX);
+      nss.print(F("     attr->value: "));
+      print_hex(attr->value, attr->val_len); // Fix. Sends correct value but prints wrong attr->value
+      nss.println();
+      nss.print(F("     src_ep: "));
+      nss.println(src_ep, HEX);
+      nss.print(F("     dst_ep: "));
+      nss.println(dst_ep, HEX);
     }
   }
 }
@@ -397,7 +394,9 @@ void sendAttributeRsp(uint16_t cluster_id, attribute* attr, uint8_t src_ep, uint
     memcpy(t_payload + 8, attr->value, attr->val_len);
   }
   else {
+   
     payload_len = 7 + attr->val_len;
+    //payload_len = 8 + attr->val_len;
     uint8_t pre[] = {0x00,
                      cmd_seq_id,
                      cmd, //Read attr resp
@@ -405,9 +404,11 @@ void sendAttributeRsp(uint16_t cluster_id, attribute* attr, uint8_t src_ep, uint
                      static_cast<uint8_t>((attr->id & 0xFF00) >> 8),
                      0x00,
                      attr->type,
+                     //attr->val_len, // added for testing
                     };
     memcpy(t_payload, pre, sizeof(pre));
     memcpy(t_payload + 7, attr->value, attr->val_len);
+    //memcpy(t_payload + 8, attr->value, attr->val_len);
   }
 
   cmd_frame_id = xbee.getNextFrameId();
@@ -428,9 +429,28 @@ void sendAttributeRsp(uint16_t cluster_id, attribute* attr, uint8_t src_ep, uint
   if (attr->type != 0) {
     xbee.send(exp_tx);
     if (DEBUG) {
-      nss.print(F("Sent Attribute Response: "));
+      nss.print(F("<- Sent Attribute Response: "));
       print_hex(t_payload, payload_len);
       nss.println();
+    }
+    if (DEBUGlv2) {
+      nss.print(F("     cluster_id: "));
+      nss.println(cluster_id, HEX);
+      nss.print(F("     attr->id: "));
+      nss.println(attr->id, HEX);
+      nss.print(F("     attr->type: "));
+      nss.println(attr->type, HEX);
+      nss.print(F("     attr->val_len: "));
+      nss.println(attr->val_len, HEX);
+      nss.print(F("     attr->value: "));
+      print_hex(attr->value, attr->val_len);
+      nss.println();
+      nss.print(F("     src_ep: "));
+      nss.println(src_ep, HEX);
+      nss.print(F("     dst_ep: "));
+      nss.println(dst_ep, HEX);
+      nss.print(F("     payload_len: "));
+      nss.println(payload_len, HEX);
     }
   }
 }
@@ -441,84 +461,55 @@ void SetAttr(uint8_t ep_id, uint16_t cluster_id, uint16_t attr_id, uint8_t value
   Endpoint end_point = GetEndpoint(ep_id);
   Cluster cluster = end_point.GetCluster(cluster_id);
   attribute* attr = cluster.GetAttr(attr_id);
-  if (DEBUG) {
-    nss.println(cluster_id);
-  }
   if (cluster_id == ON_OFF_CLUSTER_ID) {
     *attr->value = value; //breaking
     if (value == 0x00) {
+      if (ep_id == 0x01) {
+        digitalWrite(HR_PIN, RELAY_OFF);
+      }
+      else if (ep_id == 0x02) {
+        digitalWrite(WR_PIN, RELAY_OFF);
+      }
       if (DEBUG) {
-        nss.print(F("Turn Off: "));
+        nss.print(F("     Turn Off EP"));
         nss.println(end_point.id);
       }
+      
       digitalWrite(SSR_PIN, LOW);
-
     }
     else if (value == 0x01) {
+      if (ep_id == 0x01) {
+        digitalWrite(HR_PIN, RELAY_ON);
+      }
+      else if (ep_id == 0x02) {
+        digitalWrite(WR_PIN, RELAY_ON);
+      }
       if (DEBUG) {
-        nss.print(F("Turn On: "));
+        nss.print(F("     Turn On EP"));
         nss.println(end_point.id);
       }
-      digitalWrite(SSR_PIN, HIGH);
-
+      //if () {
+        digitalWrite(SSR_PIN, HIGH);
+      //}
     }
   }
-  sendAttributeWriteRsp(cluster_id, attr, ep_id, ep_id, value);
+  sendAttributeWriteRsp(cluster_id, attr, ep_id, 0x01, value);
+    nss.print(F("     cluster_id: "));
+    nss.println(cluster_id, HEX);
+    nss.print(F("     attr_id: "));
+    nss.println(attr_id, HEX);
+    nss.print(F("     value: "));
+    nss.println(value, HEX);
 }
 
 
 //Update temp, serial for now
 bool  update_temp(void *) {
-  uint8_t in_ep_id = 2;
-  uint8_t out_ep_id = 3;
-  //uint8_t amp_ep_id = 1;
+  uint8_t in_ep_id = 3;
+  uint8_t out_ep_id = 4;
 
+  sendAttributeRpt(TEMP_CLUSTER_ID, readTemp(in_ep_id), in_ep_id, 0x01);
 
-  sensors.requestTemperatures();
-
-  float TempC = sensors.getTempC(inputThermometer);
-
-  if (DEBUG) {
-    nss.print(F("In Temp: "));
-    nss.print(TempC);
-    nss.println(F("°C"));
-  }
-  
-  if (TempC < 200 && TempC > -100){
-    Endpoint end_point = GetEndpoint(in_ep_id);
-    Cluster cluster = end_point.GetCluster(TEMP_CLUSTER_ID);
-    attribute* attr = cluster.GetAttr(0x0000);
-    attr->val_len = 2;
-    uint16_t cor_t = (uint16_t)(TempC * 100.0);
-  
-    uint8_t t_value[2] = {(uint8_t)cor_t,
-                          (uint8_t)(cor_t >> 8)
-                         };
-    attr->value = t_value;
-    sendAttributeRpt(cluster.id, attr, end_point.id, end_point.id);
-  }
-
-  TempC = sensors.getTempC(outputThermometer);
-
-  if (DEBUG) {
-    nss.print(F("Out Temp: "));
-    nss.print(TempC);
-    nss.println(F("°C"));
-  }
-
-  if (TempC < 200 && TempC > -100){
-    Endpoint end_point = GetEndpoint(out_ep_id);
-    Cluster cluster = end_point.GetCluster(TEMP_CLUSTER_ID);
-    attribute* attr = cluster.GetAttr(0x0000);
-    attr->val_len = 2;
-    uint16_t cor_t = (uint16_t)(TempC * 100.0);
-  
-    uint8_t t2_value[2] = {(uint8_t)cor_t,
-                           (uint8_t)(cor_t >> 8)
-                          };
-    attr->value = t2_value;
-    sendAttributeRpt(cluster.id, attr, end_point.id, end_point.id);
-  }
-
+  sendAttributeRpt(TEMP_CLUSTER_ID, readTemp(out_ep_id), out_ep_id, 0x01);
   return true; // repeat? true
 }

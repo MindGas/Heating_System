@@ -1,13 +1,15 @@
 # XBee Heating System for Home Assistant
  ZigBee-Arduino heating system controls for Home Assistant with ZHA integration.
  
- This is a work in progress for home and hot water heating system. Two thermometers are used to check hot water boiler temperature at high and low points and send this information to Home Assistant over the ZigBee network. This temperature information then can be used in automations or creating new sensors. Another functionality is to turn on/off the electric water heater and central gas heating with two relays. Previously I have implemented this with different radios. Changing to ZigBee protocol to improve reliability and lessen maintenance by getting rid of another integration.
+ This is a work in progress for central home and hot water heating system. Two thermometers are used to check hot water boiler temperature at high and low points and send this information to Home Assistant over the ZigBee network. This temperature information then can be used in automations or creating new sensors. Another functionality is to turn on/off the electric water heater and central gas heating with two relays. Previously I have implemented this with different radios. Changing to ZigBee protocol to improve reliability and lessen maintenance by getting rid of another integration.
  
  Forked/reworked from [GitHub Gist prairiesnpr/water_heater.ino](https://gist.github.com/prairiesnpr/7a40b78e765044252a4799d328327f0a)
  
- ## Known Issues
- * Sending Endpoint temperature values fails with code 21 = Network ACK failure.
- * On/Off switch endpoint not tested, presuming not functioning.
+ ## Known Issues and Work List
+ - [x] ~~Sending Endpoint temperature values fails with code 21 = Network ACK failure.~~(Fixed)
+ - [x] ~~On/Off switch endpoint not tested, presuming not functioning.~~ (Implemented and tested)
+ - [ ] Improve initialization (pairing) logic. Basic Cluster attribute sent twice.
+ - [ ] Relay safety feature. Turn off relays if no status update within 1 minute.
  
  ## Hardware:
   Prototyping:
@@ -17,6 +19,7 @@
  * Arduino Nano
  * Tempereture Sensor DS18B20 x2
  * Resistor 4.7kΩ
+ * Relay x2
 
  Prototyping / Debugging Setup:
  
@@ -58,3 +61,6 @@ Debugging output in Arduino Serial Monitor
   
  [Digi XBee/XBee-PRO® S2C Zigbee® RF Module Decommentation](https://www.digi.com/resources/documentation/Digidocs/90002002/Default.htm)
  
+ [ZigBee Alliance - ZigBee Specification document](https://zigbeealliance.org/wp-content/uploads/2019/12/docs-05-3474-21-0csg-zigbee-specification.pdf)
+
+ [ZigBee Alliance - ZigBee Cluster Library Specification document] (https://zigbeealliance.org/wp-content/uploads/2019/12/07-5123-06-zigbee-cluster-library-specification.pdf)

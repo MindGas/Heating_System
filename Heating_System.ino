@@ -4,9 +4,8 @@
 #include <DallasTemperature.h>
 #include <arduino-timer.h>
 #include <EEPROM.h>
-#include "declare.h"
 #include "classes.h"
-#include "other.h"
+#include "declare.h"
 #include "functions.h"
 #include "send.h"
 #include "response.h"
@@ -18,26 +17,39 @@ void setup() {
   
   if (DEBUG) {
     nss.begin(9600);
-    nss.println(F("Startup"));
+    nss.println();
+    nss.println(F("### Starting up XBee-Arduino ###"));
   }
 
   sensors.begin();
 
   xbee.setSerial(Serial);
 
+  for (int sensor = 1, pin = RELAY_1; sensor <= NUMBER_OF_RELAYS; sensor++, pin++) {
+    // Make sure relays are off when starting up
+    digitalWrite(pin, RELAY_OFF);
+    // Then set relay pins in output mode
+    pinMode(pin, OUTPUT);
+    // Set relay to last known state (using eeprom storage)
+    // digitalWrite(pin, loadState(sensor)?RELAY_ON:RELAY_OFF);
+  }
+  
+  if (DEBUGlv2) {
+    nss.println(F("  Starting temperature device search"));
+  }
   while(sensors.getDeviceCount() == 0) {
     delay(1000);
   }
   if (DEBUG) {
-    nss.print(F("Found "));
+    nss.print(F("  Found "));
     nss.print(sensors.getDeviceCount(), DEC);
-    nss.println(F(" devices."));
+    nss.println(F(" temperature sensors."));
   }
 
-  sensors.getAddress(inputThermometer, 0);
-  sensors.getAddress(outputThermometer, 1);
-  sensors.setResolution(inputThermometer, 9);
-  sensors.setResolution(outputThermometer, 9);
+  sensors.getAddress(highThermometer, 0);
+  sensors.getAddress(lowThermometer, 1);
+  sensors.setResolution(highThermometer, 9);
+  sensors.setResolution(lowThermometer, 9);
 
   pinMode(SSR_PIN, OUTPUT);
 
@@ -56,7 +68,7 @@ void setup() {
   sendAT(slCmd);
   
   if (DEBUG) {
-    nss.print(F("MAC (SH+SL): "));
+    nss.print(F("  MAC (SH+SL): "));
     printAddr(macAddr.Get());
   }
   
@@ -70,7 +82,7 @@ void setup() {
   Endpoint end_point = GetEndpoint(ep_id);
   Cluster cluster = end_point.GetCluster(ON_OFF_CLUSTER_ID);
   attribute* attr = cluster.GetAttr(0x0000);
-  *attr->value = 0x01;  
+  *attr->value = 0x01;
 }
 
 
@@ -85,18 +97,22 @@ void loop() {
     nwk_pending = 1;
     sendAT(netCmd);
   }
-  if (!nwk_pending && !assc_pending) {
+  if (!nwk_pending && !assc_pending && !setup_complete) {
     setup_complete = 1;
+    if (DEBUG) {
+      nss.println(F("### Setup finished. Starting Main Loop ###"));
+      nss.println();
+    }
   }
   if (setup_complete && !start) {
     sendDevAnnounce();
 
     start = 1;
   }
-  if (start) {
+  //if (start) {
     
     
-  }
+  //}
 
   timer.tick();
 }
