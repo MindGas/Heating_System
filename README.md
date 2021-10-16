@@ -61,7 +61,7 @@ Debugging output in Arduino Serial Monitor
  
  [XBee-Arduino library by andrewrapp](https://github.com/andrewrapp/xbee-arduino)
   
- [Digi XBee/XBee-PRO® S2C Zigbee® RF Module Decommentation](https://www.digi.com/resources/documentation/Digidocs/90002002/Default.htm)
+ [Digi XBee/XBee-PRO® S2C Zigbee® RF Module manual](https://www.digi.com/resources/documentation/Digidocs/90002002/Default.htm)
  
  [ZigBee Alliance - ZigBee Specification document](https://zigbeealliance.org/wp-content/uploads/2019/12/docs-05-3474-21-0csg-zigbee-specification.pdf)
 
