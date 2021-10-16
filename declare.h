@@ -1,5 +1,6 @@
+// Enable debug prints to serial monitor
 #define DEBUG true
-#define DEBUGlv2 true // extra debugging output over softserial. DEBUG must be true before enabling this one
+#define DEBUGlv2 false // extra debugging output over softserial. DEBUG must be true before enabling this one
 
 #define WATER_TEMP_BUS 7  // Tempetature sensor pin
 #define SSR_PIN LED_BUILTIN // LED for Relay On/Off state
@@ -8,8 +9,8 @@
 //#define AMP_PIN 16
 #define NUM_ENDPOINTS 4   // Number of EndPoints (2x Temperature, 2x Switch)
 
-#define RELAY_1  5  // Arduino Digital I/O pin number for first relay (second on pin+1 etc)
-#define NUMBER_OF_RELAYS 2 // Total number of attached relays
+//#define RELAY_1  5  // Arduino Digital I/O pin number for first relay (second on pin+1 etc)
+//#define NUMBER_OF_RELAYS 2 // Total number of attached relays
 #define RELAY_ON 1  // GPIO value to write to turn on attached relay
 #define RELAY_OFF 0 // GPIO value to write to turn off attached relay
 
@@ -109,33 +110,25 @@ LocalMac macAddr = LocalMac(0);
 static uint8_t* manuf = (uint8_t*)"xBee-Arduino";
 
 static attribute dev_basic_attr[] {{0x0004, manuf, 12, ZCL_CHAR_STR}, {0x0005, (uint8_t*)"Heating System", 14, ZCL_CHAR_STR}};
-//static attribute in_temp_basic_attr[] {{0x0004, manuf, 12, ZCL_CHAR_STR}, {0x0005, (uint8_t*)"High Temp", 9, ZCL_CHAR_STR}};
-//static attribute out_temp_basic_attr[] {{0x0004, manuf, 12, ZCL_CHAR_STR}, {0x0005, (uint8_t*)"Low Temp", 8, ZCL_CHAR_STR}};
 
 static attribute hr_attr[] {{0x0000, 0x00, 1, ZCL_BOOL}};
 static attribute wr_attr[] {{0x0000, 0x00, 1, ZCL_BOOL}};
-//static attribute metering_attr[] = {{INSTANTANEOUS_DEMAND, 0x00, 1, ZCL_UINT16_T}};
 static attribute in_temp_attr[] = {{0x0000, 0x00, 1, ZCL_UINT16_T}};
 static attribute out_temp_attr[] = {{0x0000, 0x00, 1, ZCL_UINT16_T}};
 
 //dev_basic_attr
-
-//static Cluster hr_in_clusters[] = {Cluster(BASIC_CLUSTER_ID, dev_basic_attr, 2), Cluster(ON_OFF_CLUSTER_ID, hr_attr, 1), Cluster(METERING_CLUSTER_ID, metering_attr, 1)};
 static Cluster hr_in_clusters[] = {Cluster(BASIC_CLUSTER_ID, dev_basic_attr, 2), Cluster(ON_OFF_CLUSTER_ID, hr_attr, 1)};
 static Cluster wr_in_clusters[] = {Cluster(ON_OFF_CLUSTER_ID, wr_attr, 1)};
-//static Cluster i_in_clusters[] = {Cluster(BASIC_CLUSTER_ID, in_temp_basic_attr, 2), Cluster(TEMP_CLUSTER_ID, in_temp_attr, 1)};
-//static Cluster o_in_clusters[] = {Cluster(BASIC_CLUSTER_ID, out_temp_basic_attr, 2), Cluster(TEMP_CLUSTER_ID, out_temp_attr, 1)};
 static Cluster i_in_clusters[] = {Cluster(TEMP_CLUSTER_ID, in_temp_attr, 1)};
 static Cluster o_in_clusters[] = {Cluster(TEMP_CLUSTER_ID, out_temp_attr, 1)};
 
 static Cluster out_clusters[] = {};
 
 static Endpoint ENDPOINTS[NUM_ENDPOINTS] = {
-  //Endpoint(1, ON_OFF_OUTPUT, hr_in_clusters, out_clusters, 3, 0),
   Endpoint(1, ON_OFF_OUTPUT, hr_in_clusters, out_clusters, 2, 0),
-  Endpoint(2, ON_OFF_OUTPUT, wr_in_clusters, out_clusters, 2, 0),
-  Endpoint(3, TEMPERATURE_SENSOR, i_in_clusters, out_clusters, 2, 0),
-  Endpoint(4, TEMPERATURE_SENSOR, o_in_clusters, out_clusters, 2, 0),
+  Endpoint(2, ON_OFF_OUTPUT, wr_in_clusters, out_clusters, 1, 0),
+  Endpoint(3, TEMPERATURE_SENSOR, i_in_clusters, out_clusters, 1, 0),
+  Endpoint(4, TEMPERATURE_SENSOR, o_in_clusters, out_clusters, 1, 0),
 };
 
 XBeeAddress64 COORDINATOR64 = XBeeAddress64(0, 0);
@@ -158,6 +151,8 @@ typedef void (*cmd_ptr)();
 cmd_ptr last_command;
 uint8_t cmd_seq_id;
 
+int HRstatus = 0; //Central Heating Relay status updated in time? 0 no / 1 yes
+int WRstatus = 0; //Water Heating Relay status updated in time? 0 no / 1 yes
 
 uint64_t SWAP_UINT64(uint64_t num) {
   uint64_t byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7;

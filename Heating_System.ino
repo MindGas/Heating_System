@@ -25,14 +25,15 @@ void setup() {
 
   xbee.setSerial(Serial);
 
-  for (int sensor = 1, pin = RELAY_1; sensor <= NUMBER_OF_RELAYS; sensor++, pin++) {
-    // Make sure relays are off when starting up
-    digitalWrite(pin, RELAY_OFF);
-    // Then set relay pins in output mode
-    pinMode(pin, OUTPUT);
-    // Set relay to last known state (using eeprom storage)
-    // digitalWrite(pin, loadState(sensor)?RELAY_ON:RELAY_OFF);
-  }
+  // Make sure relays are off when starting up
+  digitalWrite(HR_PIN, RELAY_OFF);
+  digitalWrite(WR_PIN, RELAY_OFF);
+  // Then set relay pins in output mode
+  pinMode(HR_PIN, OUTPUT);
+  pinMode(WR_PIN, OUTPUT);
+  // Set relay to last known state (using eeprom storage)
+  // digitalWrite(pin, loadState(sensor)?RELAY_ON:RELAY_OFF);
+
   
   if (DEBUGlv2) {
     nss.println(F("  Starting temperature device search"));
@@ -77,12 +78,15 @@ void setup() {
   //Update temperature
   timer.every(30000, update_temp);
 
+  //Check if relay status received
+  timer.every(60000, check_relay_status);
+
   //Update our current state
-  uint8_t ep_id = 1;
-  Endpoint end_point = GetEndpoint(ep_id);
-  Cluster cluster = end_point.GetCluster(ON_OFF_CLUSTER_ID);
-  attribute* attr = cluster.GetAttr(0x0000);
-  *attr->value = 0x01;
+  //uint8_t ep_id = 1;
+  //Endpoint end_point = GetEndpoint(ep_id);
+  //Cluster cluster = end_point.GetCluster(ON_OFF_CLUSTER_ID);
+  //attribute* attr = cluster.GetAttr(0x0000);
+  //*attr->value = 0x01;
 }
 
 

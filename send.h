@@ -456,8 +456,14 @@ void sendAttributeRsp(uint16_t cluster_id, attribute* attr, uint8_t src_ep, uint
 }
 
 
-void SetAttr(uint8_t ep_id, uint16_t cluster_id, uint16_t attr_id, uint8_t value)
-{
+void SetAttr(uint8_t ep_id, uint16_t cluster_id, uint16_t attr_id, uint8_t value) {
+  if (ep_id == 0x01) {
+    HRstatus = 1;
+  }
+  if (ep_id == 0x02) {
+    WRstatus = 1;
+  }
+  
   Endpoint end_point = GetEndpoint(ep_id);
   Cluster cluster = end_point.GetCluster(cluster_id);
   attribute* attr = cluster.GetAttr(attr_id);
@@ -474,7 +480,6 @@ void SetAttr(uint8_t ep_id, uint16_t cluster_id, uint16_t attr_id, uint8_t value
         nss.print(F("     Turn Off EP"));
         nss.println(end_point.id);
       }
-      
       digitalWrite(SSR_PIN, LOW);
     }
     else if (value == 0x01) {

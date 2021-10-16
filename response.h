@@ -52,7 +52,8 @@ void atCmdResp(AtCommandResponse& resp, uintptr_t) {
           case 0:
             nss.println("Successful");
             break;
-          case 33:
+          // running out of memory
+          /*case 33:
             nss.println("Scan found no PANs");
             break;
           case 34:
@@ -66,7 +67,7 @@ void atCmdResp(AtCommandResponse& resp, uintptr_t) {
             break;
           case 255:
             nss.println("Initialization time - FF");
-            break;
+            break;*/
           default:
             nss.println(associated, HEX);
             break;
@@ -202,8 +203,8 @@ void zdoReceive(ZBExplicitRxResponse& erx, uintptr_t) {
       sendSimpleDescRpt(ep);
     }
     else if (erx.getClusterId() == ON_OFF_CLUSTER_ID) {
-      uint8_t len_data = erx.getDataLength() - 3;
-      uint16_t attr_rqst[len_data / 2];
+      //uint8_t len_data = erx.getDataLength() - 3;
+      //uint16_t attr_rqst[len_data / 2];
       if (DEBUG) {
         nss.print("-> Received On/Off Cluster Request for EP");
         nss.print(ep, HEX);
@@ -222,7 +223,8 @@ void zdoReceive(ZBExplicitRxResponse& erx, uintptr_t) {
         SetAttr(ep, erx.getClusterId(), 0x0000, 0x01);
       }
       else {
-        if (DEBUG) {
+        if (DEBUGlv2) {
+          // Command B looks like acknoledgment. No use for it now
           nss.print(F("     Received Unknown On/Off Cluster Command ("));
           nss.print(cmd_id, HEX);
           nss.print(F(") for EP"));
@@ -233,8 +235,8 @@ void zdoReceive(ZBExplicitRxResponse& erx, uintptr_t) {
 
 
     else if (erx.getClusterId() == TEMP_CLUSTER_ID) {
-      uint8_t len_data = erx.getDataLength() - 3;
-      uint16_t attr_rqst[len_data / 2];
+      //uint8_t len_data = erx.getDataLength() - 3;
+      //uint16_t attr_rqst[len_data / 2];
       //uint8_t ep = erx.getDstEndpoint();
 
       //cmd_seq_id = erx.getFrameData()[erx.getDataOffset() + 1];
@@ -251,7 +253,8 @@ void zdoReceive(ZBExplicitRxResponse& erx, uintptr_t) {
         sendAttributeRsp(erx.getClusterId(), readTemp(ep), ep, erx.getSrcEndpoint(), 0x01);
       }
       else {
-        if (DEBUG) {
+        if (DEBUGlv2) {
+          // Command B looks like acknoledgment. No use for it now
           nss.print("-> Received Unknown Temperature Cluster Command (");
           nss.print(cmd_id, HEX);
           nss.print(F(") for EP"));
@@ -264,35 +267,36 @@ void zdoReceive(ZBExplicitRxResponse& erx, uintptr_t) {
         }
       }
     }
-
-      else if (erx.getClusterId() == BASIC_CLUSTER_ID) {
-      //cmd_seq_id = erx.getFrameData()[erx.getDataOffset() + 1];
-      //uint8_t ep = erx.getDstEndpoint();
+    else if (erx.getClusterId() == BASIC_CLUSTER_ID) {
       if (cmd_id == 0x00) {
-        uint8_t len_data = erx.getDataLength() - 3;
-        uint16_t attr_rqst[len_data / 2];
+        //uint8_t len_data = erx.getDataLength() - 3;
   
         Endpoint end_point = GetEndpoint(ep);
-        for (uint8_t i = erx.getDataOffset() + 3; i < (len_data + erx.getDataOffset() + 3); i += 2) {
-          attr_rqst[i / 2] = (erx.getFrameData()[i + 1] << 8) |
+        uint8_t i = erx.getDataOffset() + 3;
+        uint16_t attr_rqst = (erx.getFrameData()[i + 1] << 8) |
                              (erx.getFrameData()[i] & 0xff);
-          attribute* attr = end_point.GetCluster(erx.getClusterId()).GetAttr(attr_rqst[i / 2]);
-          if (DEBUG) {
-            nss.print(F("-> Received Basic Cluster Attribute Request for EP"));
-            nss.print(ep, HEX);
-            nss.print(F(": "));
-            print_hex(erx.getFrameData(), erx.getFrameDataLength());
-            nss.println();
-            nss.print("attrID: ");
-            nss.println(attr_rqst[i / 2]);
-            nss.print("cmdID: ");
-            nss.println(cmd_id, HEX);
-          }
-          sendAttributeRsp(erx.getClusterId(), attr, ep, erx.getSrcEndpoint(), 0x01);
+        attribute* attr = end_point.GetCluster(erx.getClusterId()).GetAttr(attr_rqst);
+
+        if (DEBUG) {
+          nss.print(F("-> Received Basic Cluster Attribute Request for EP"));
+          nss.print(ep, HEX);
+          nss.print(F(": "));
+          print_hex(erx.getFrameData(), erx.getFrameDataLength());
+          nss.println();
         }
+        if (DEBUGlv2) {
+          nss.print("attr ID: ");
+          nss.println(attr_rqst);
+          nss.print("CMD ID: ");
+          nss.println(cmd_id, HEX);
+          nss.print("Data Offset: ");
+          nss.println(erx.getDataOffset(), HEX);
+        }
+        sendAttributeRsp(erx.getClusterId(), attr, ep, erx.getSrcEndpoint(), 0x01);
       }
       else {
-        if (DEBUG) {
+        if (DEBUGlv2) {
+          // Command B looks like acknoledgment. No use for it now
           nss.print("-> Received Unknown Basic Cluster Command (");
           nss.print(cmd_id, HEX);
           nss.print(F(") for EP"));
@@ -304,8 +308,6 @@ void zdoReceive(ZBExplicitRxResponse& erx, uintptr_t) {
           nss.println("");
         }
       }
-
-      
     }
   }
 }

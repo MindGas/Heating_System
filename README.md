@@ -6,10 +6,12 @@
  Forked/reworked from [GitHub Gist prairiesnpr/water_heater.ino](https://gist.github.com/prairiesnpr/7a40b78e765044252a4799d328327f0a)
  
  ## Known Issues and Work List
- - [x] ~~Sending Endpoint temperature values fails with code 21 = Network ACK failure.~~(Fixed)
+ - [x] ~~Sending Endpoint temperature values fails with code 21 = Network ACK failure.~~ (Fixed)
  - [x] ~~On/Off switch endpoint not tested, presuming not functioning.~~ (Implemented and tested)
- - [ ] Improve initialization (pairing) logic. Basic Cluster attribute sent twice.
- - [ ] Relay safety feature. Turn off relays if no status update within 1 minute.
+ - [x] ~~Improve initialization (pairing) logic. Basic Cluster attribute sent twice.~~ (Got rid of the loop)
+ - [x] ~~Relay safety feature. Turn off relays if no status update within 1 minute.~~ (timer checks if repay status was received every 1 min)
+ - [x] ~~3 on/off endpoints shows up in Home Assistant while only 2 defined.~~ (wrong number of clusters defined for some of the EPs)
+ - [ ] Clean up code
  
  ## Hardware:
   Prototyping:

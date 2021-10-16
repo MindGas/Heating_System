@@ -67,7 +67,7 @@ attribute* readTemp(uint8_t ep_id) {
   Endpoint end_point = GetEndpoint(ep_id);
     Cluster cluster = end_point.GetCluster(TEMP_CLUSTER_ID);
     attribute* Tattr = cluster.GetAttr(0x0000);
-  if (TempC < 85 && TempC > 10){
+  if (TempC < 85 && TempC > 5){
     
     Tattr->val_len = 2;
     uint16_t cor_t = (uint16_t)(TempC * 100.0);
@@ -79,4 +79,36 @@ attribute* readTemp(uint8_t ep_id) {
     delay(200);
     return Tattr;
   }
+}
+
+
+bool  check_relay_status() {
+  if (HRstatus == 1) {
+    if (DEBUG) {
+      nss.println("Central Heating Relay Status Received Witin Time");
+    }
+    HRstatus = 0;
+  }else {
+    if (DEBUG) {
+      nss.println("Central Heating Relay Status NOT Received Witin Time!!!");
+      nss.println("     Shutting Down Relay!!!");
+    }
+    // Change relay state to Off
+    digitalWrite(HR_PIN, RELAY_OFF);
+  }
+
+  if (WRstatus == 1) {
+    if (DEBUG) {
+      nss.println("Water Heating Relay Status Received Witin Time");
+    }
+    WRstatus = 0;
+  }else {
+    if (DEBUG) {
+      nss.println("Water Heating Relay Status NOT Received Witin Time!!!");
+      nss.println("     Shutting Down Relay!!!");
+    }
+    // Change relay state to Off
+    digitalWrite(WR_PIN, RELAY_OFF);
+  }
+  return true; // repeat? true
 }
