@@ -50,8 +50,8 @@ Debugging output in Arduino Serial Monitor
 ![Serial Monitor](https://github.com/MindGas/Heating_System/blob/main/images/SerialMonitor-DebuggingInfo.jpg?raw=true)
  
  ## Good To Know
- * Disconnect TX/RX lines between XBee and Uno when uploading scetch
- * If using Arduino Serial Monitor don't forget to switch port to Nano port after uploading scetch to Uno.
+ * Disconnect TX/RX lines between XBee and Uno when uploading sketch
+ * If using Arduino Serial Monitor don't forget to switch port to Nano port after uploading sketch to Uno.
  * Disconnect TX/RX lines between XBee and Uno when configuring XBee over XCTU
  
  ## Would Not Be Possible Without
