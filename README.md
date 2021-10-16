@@ -65,4 +65,4 @@ Debugging output in Arduino Serial Monitor
  
  [ZigBee Alliance - ZigBee Specification document](https://zigbeealliance.org/wp-content/uploads/2019/12/docs-05-3474-21-0csg-zigbee-specification.pdf)
 
- [ZigBee Alliance - ZigBee Cluster Library Specification document] (https://zigbeealliance.org/wp-content/uploads/2019/12/07-5123-06-zigbee-cluster-library-specification.pdf)
+ [ZigBee Alliance - ZigBee Cluster Library Specification document](https://zigbeealliance.org/wp-content/uploads/2019/12/07-5123-06-zigbee-cluster-library-specification.pdf)
