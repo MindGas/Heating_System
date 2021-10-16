@@ -136,7 +136,7 @@ void sendSimpleDescRpt(uint8_t ep) {
   //uint8_t pre_len = 11;
   
 
-  uint8_t pre[] = {cmd_seq_id,
+  uint8_t pre[] = {cmd_seq_id, //Has to match requesting packet
                    0x00,
                    netAddr[1],
                    netAddr[0],
@@ -235,7 +235,6 @@ void sendAttributeWriteRsp(uint16_t cluster_id, attribute* attr, uint8_t src_ep,
           0x01 Read Attr Response
           0x0D Discover Attributes Response
           0x04 Write Attr Response
-
   */
   uint8_t payload_len = 6 + attr->val_len;
 
@@ -247,7 +246,6 @@ void sendAttributeWriteRsp(uint16_t cluster_id, attribute* attr, uint8_t src_ep,
                               attr->type,
                               result
                              };
-
 
   memcpy(t_payload, pre, sizeof(pre));
   cmd_frame_id = xbee.getNextFrameId();
@@ -265,11 +263,10 @@ void sendAttributeWriteRsp(uint16_t cluster_id, attribute* attr, uint8_t src_ep,
                                HA_PROFILE_ID //profile ID
                               );
 
-
   if (attr->type != 0) {
     xbee.send(exp_tx);
     if (DEBUG) {
-      nss.println(F("<- Sent Attr Write Rsp"));
+      nss.println(F("<- Sent Attribute Write Response"));
     }
   }
 }
@@ -340,23 +337,24 @@ void sendAttributeRpt(uint16_t cluster_id, attribute* attr, uint8_t src_ep, uint
       nss.print(F("<- Sent Attribute Report: "));
       print_hex(t_payload, payload_len);
       nss.println();
-    }
-    if (DEBUGlv2) {
-      nss.print(F("     cluster_id: "));
-      nss.println(cluster_id, HEX);
-      nss.print(F("     attr->id: "));
-      nss.println(attr->id, HEX);
-      nss.print(F("     attr->type: "));
-      nss.println(attr->type, HEX);
-      nss.print(F("     attr->val_len: "));
-      nss.println(attr->val_len, HEX);
-      nss.print(F("     attr->value: "));
-      print_hex(attr->value, attr->val_len); // Fix. Sends correct value but prints wrong attr->value
-      nss.println();
-      nss.print(F("     src_ep: "));
-      nss.println(src_ep, HEX);
-      nss.print(F("     dst_ep: "));
-      nss.println(dst_ep, HEX);
+
+      if (DEBUGlv2) {
+        nss.print(F("     cluster_id: "));
+        nss.println(cluster_id, HEX);
+        nss.print(F("     attr->id: "));
+        nss.println(attr->id, HEX);
+        nss.print(F("     attr->type: "));
+        nss.println(attr->type, HEX);
+        nss.print(F("     attr->val_len: "));
+        nss.println(attr->val_len, HEX);
+        nss.print(F("     attr->value: "));
+        print_hex(attr->value, attr->val_len); // Fix. Sends correct value but prints wrong attr->value
+        nss.println();
+        nss.print(F("     src_ep: "));
+        nss.println(src_ep, HEX);
+        nss.print(F("     dst_ep: "));
+        nss.println(dst_ep, HEX);
+      }
     }
   }
 }
@@ -432,25 +430,26 @@ void sendAttributeRsp(uint16_t cluster_id, attribute* attr, uint8_t src_ep, uint
       nss.print(F("<- Sent Attribute Response: "));
       print_hex(t_payload, payload_len);
       nss.println();
-    }
-    if (DEBUGlv2) {
-      nss.print(F("     cluster_id: "));
-      nss.println(cluster_id, HEX);
-      nss.print(F("     attr->id: "));
-      nss.println(attr->id, HEX);
-      nss.print(F("     attr->type: "));
-      nss.println(attr->type, HEX);
-      nss.print(F("     attr->val_len: "));
-      nss.println(attr->val_len, HEX);
-      nss.print(F("     attr->value: "));
-      print_hex(attr->value, attr->val_len);
-      nss.println();
-      nss.print(F("     src_ep: "));
-      nss.println(src_ep, HEX);
-      nss.print(F("     dst_ep: "));
-      nss.println(dst_ep, HEX);
-      nss.print(F("     payload_len: "));
-      nss.println(payload_len, HEX);
+    
+      if (DEBUGlv2) {
+        nss.print(F("     cluster_id: "));
+        nss.println(cluster_id, HEX);
+        nss.print(F("     attr->id: "));
+        nss.println(attr->id, HEX);
+        nss.print(F("     attr->type: "));
+        nss.println(attr->type, HEX);
+        nss.print(F("     attr->val_len: "));
+        nss.println(attr->val_len, HEX);
+        nss.print(F("     attr->value: "));
+        print_hex(attr->value, attr->val_len);
+        nss.println();
+        nss.print(F("     src_ep: "));
+        nss.println(src_ep, HEX);
+        nss.print(F("     dst_ep: "));
+        nss.println(dst_ep, HEX);
+        nss.print(F("     payload_len: "));
+        nss.println(payload_len, HEX);
+      }
     }
   }
 }
@@ -477,8 +476,10 @@ void SetAttr(uint8_t ep_id, uint16_t cluster_id, uint16_t attr_id, uint8_t value
         digitalWrite(WR_PIN, RELAY_OFF);
       }
       if (DEBUG) {
-        nss.print(F("     Turn Off EP"));
-        nss.println(end_point.id);
+        if (DEBUGlv2) {
+          nss.print(F("     Turn Off EP"));
+          nss.println(end_point.id);
+        }
       }
       digitalWrite(SSR_PIN, LOW);
     }
@@ -490,21 +491,25 @@ void SetAttr(uint8_t ep_id, uint16_t cluster_id, uint16_t attr_id, uint8_t value
         digitalWrite(WR_PIN, RELAY_ON);
       }
       if (DEBUG) {
-        nss.print(F("     Turn On EP"));
-        nss.println(end_point.id);
+        if (DEBUGlv2) {
+          nss.print(F("     Turn On EP"));
+          nss.println(end_point.id);
+        }
       }
-      //if () {
-        digitalWrite(SSR_PIN, HIGH);
-      //}
+      digitalWrite(SSR_PIN, HIGH);
     }
   }
   sendAttributeWriteRsp(cluster_id, attr, ep_id, 0x01, value);
-    nss.print(F("     cluster_id: "));
-    nss.println(cluster_id, HEX);
-    nss.print(F("     attr_id: "));
-    nss.println(attr_id, HEX);
-    nss.print(F("     value: "));
-    nss.println(value, HEX);
+  if (DEBUG) {
+    if (DEBUGlv2) {
+      nss.print(F("     cluster_id: "));
+      nss.println(cluster_id, HEX);
+      nss.print(F("     attr_id: "));
+      nss.println(attr_id, HEX);
+      nss.print(F("     value: "));
+      nss.println(value, HEX);
+    }
+  }
 }
 
 

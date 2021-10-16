@@ -9,8 +9,8 @@
  - [x] ~~Sending Endpoint temperature values fails with code 21 = Network ACK failure.~~ (Fixed)
  - [x] ~~On/Off switch endpoint not tested, presuming not functioning.~~ (Implemented and tested)
  - [x] ~~Improve initialization (pairing) logic. Basic Cluster attribute sent twice.~~ (Got rid of the loop)
- - [x] ~~Relay safety feature. Turn off relays if no status update within 1 minute.~~ (timer checks if repay status was received every 1 min)
- - [x] ~~3 on/off endpoints shows up in Home Assistant while only 2 defined.~~ (wrong number of clusters defined for some of the EPs)
+ - [x] ~~Relay safety feature. Turn off relays if no status update within 1 minute.~~ (timer checks if relay status was received every 1 min)
+ - [x] ~~3 on/off endpoints shows up in Home Assistant while only 2 defined.~~ (wrong number of clusters were defined for some of the EPs)
  - [ ] Clean up code
  
  ## Hardware:

@@ -14,7 +14,7 @@
 void setup() {
   digitalWrite(SSR_PIN, HIGH);
   Serial.begin(9600);
-  
+
   if (DEBUG) {
     nss.begin(9600);
     nss.println();
@@ -31,12 +31,11 @@ void setup() {
   // Then set relay pins in output mode
   pinMode(HR_PIN, OUTPUT);
   pinMode(WR_PIN, OUTPUT);
-  // Set relay to last known state (using eeprom storage)
-  // digitalWrite(pin, loadState(sensor)?RELAY_ON:RELAY_OFF);
-
   
-  if (DEBUGlv2) {
-    nss.println(F("  Starting temperature device search"));
+  if (DEBUG) {
+    if (DEBUGlv2) {
+      nss.println(F("  Starting temperature device search"));
+    }
   }
   while(sensors.getDeviceCount() == 0) {
     delay(1000);
@@ -57,11 +56,13 @@ void setup() {
   delay(2000);
 
   //Set up callbacks
-  if (DEBUGlv2) {
-    xbee.onZBTxStatusResponse(zbTxStatusResp);
-    xbee.onModemStatusResponse(modemResp);
-    xbee.onOtherResponse(otherResp);
+  if (DEBUG) {
+    if (DEBUGlv2) {
+      xbee.onModemStatusResponse(modemResp);
+      xbee.onOtherResponse(otherResp);
+    }
   }
+  xbee.onZBTxStatusResponse(zbTxStatusResp);
   xbee.onZBExplicitRxResponse(zdoReceive);
   xbee.onAtCommandResponse(atCmdResp);
 
@@ -80,13 +81,6 @@ void setup() {
 
   //Check if relay status received
   timer.every(60000, check_relay_status);
-
-  //Update our current state
-  //uint8_t ep_id = 1;
-  //Endpoint end_point = GetEndpoint(ep_id);
-  //Cluster cluster = end_point.GetCluster(ON_OFF_CLUSTER_ID);
-  //attribute* attr = cluster.GetAttr(0x0000);
-  //*attr->value = 0x01;
 }
 
 
@@ -97,10 +91,12 @@ void loop() {
     assc_pending = 1;
     sendAT(assocCmd);
   }
+  
   if (netAddr[0] == 0 && netAddr[1] == 0 && !nwk_pending && !assc_pending) {
     nwk_pending = 1;
     sendAT(netCmd);
   }
+  
   if (!nwk_pending && !assc_pending && !setup_complete) {
     setup_complete = 1;
     if (DEBUG) {
@@ -108,13 +104,13 @@ void loop() {
       nss.println();
     }
   }
+  
   if (setup_complete && !start) {
     sendDevAnnounce();
-
     start = 1;
   }
+  
   //if (start) {
-    
     
   //}
 

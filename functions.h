@@ -55,13 +55,15 @@ attribute* readTemp(uint8_t ep_id) {
   else if (ep_id == 4) {
     TempC = sensors.getTempC(lowThermometer);
   }
-  
-  if (DEBUGlv2) {
-    nss.print(F("Read Temp for EP"));
-    nss.print(ep_id, HEX);
-    nss.print(F(": "));
-    nss.print(TempC);
-    nss.println(F("°C"));
+
+  if (DEBUG) {
+    if (DEBUGlv2) {
+      nss.print(F("!! Read Temp for EP"));
+      nss.print(ep_id, HEX);
+      nss.print(F(": "));
+      nss.print(TempC);
+      nss.println(F("°C"));
+    }
   }
 
   Endpoint end_point = GetEndpoint(ep_id);
@@ -85,12 +87,12 @@ attribute* readTemp(uint8_t ep_id) {
 bool  check_relay_status() {
   if (HRstatus == 1) {
     if (DEBUG) {
-      nss.println("Central Heating Relay Status Received Witin Time");
+      nss.println("!! Central Heating Relay Status Received Witin Time");
     }
     HRstatus = 0;
   }else {
     if (DEBUG) {
-      nss.println("Central Heating Relay Status NOT Received Witin Time!!!");
+      nss.println("!! Central Heating Relay Status NOT Received Witin Time!!!");
       nss.println("     Shutting Down Relay!!!");
     }
     // Change relay state to Off
@@ -99,12 +101,12 @@ bool  check_relay_status() {
 
   if (WRstatus == 1) {
     if (DEBUG) {
-      nss.println("Water Heating Relay Status Received Witin Time");
+      nss.println("!! Water Heating Relay Status Received Witin Time");
     }
     WRstatus = 0;
   }else {
     if (DEBUG) {
-      nss.println("Water Heating Relay Status NOT Received Witin Time!!!");
+      nss.println("!! Water Heating Relay Status NOT Received Witin Time!!!");
       nss.println("     Shutting Down Relay!!!");
     }
     // Change relay state to Off

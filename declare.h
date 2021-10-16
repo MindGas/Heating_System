@@ -1,16 +1,13 @@
 // Enable debug prints to serial monitor
 #define DEBUG true
-#define DEBUGlv2 false // extra debugging output over softserial. DEBUG must be true before enabling this one
+#define DEBUGlv2 false // extra debugging output over softserial.
 
 #define WATER_TEMP_BUS 7  // Tempetature sensor pin
 #define SSR_PIN LED_BUILTIN // LED for Relay On/Off state
 #define HR_PIN 5 // Central Heating Relay On/Off pin
 #define WR_PIN 6 // Water Heating Relay On/Off pin
-//#define AMP_PIN 16
 #define NUM_ENDPOINTS 4   // Number of EndPoints (2x Temperature, 2x Switch)
 
-//#define RELAY_1  5  // Arduino Digital I/O pin number for first relay (second on pin+1 etc)
-//#define NUMBER_OF_RELAYS 2 // Total number of attached relays
 #define RELAY_ON 1  // GPIO value to write to turn on attached relay
 #define RELAY_OFF 0 // GPIO value to write to turn off attached relay
 
@@ -23,10 +20,10 @@ SoftwareSerial nss(ssRX, ssTX);
 //One wire temp sensors
 OneWire oneWire(WATER_TEMP_BUS);
 DallasTemperature sensors(&oneWire);
-//Water Input Temp
-DeviceAddress highThermometer = {0x28, 0xAA, 0x18, 0xDB, 0x19, 0x13, 0x02, 0x9B}; // populated with correct address with sensors.getAddress(highThermometer, 0)
-//Water Output Temp
-DeviceAddress lowThermometer = {0x28, 0xAA, 0x3C, 0xB1, 0x3C, 0x14, 0x01, 0xDA}; // populated with correct address with sensors.getAddress(lowThermometer, 1)
+//Water top Temp
+DeviceAddress highThermometer; //= {0x28, 0xAA, 0x18, 0xDB, 0x19, 0x13, 0x02, 0x9B}; // populated with correct address with sensors.getAddress(highThermometer, 0)
+//Water bottom Temp
+DeviceAddress lowThermometer; //= {0x28, 0xAA, 0x3C, 0xB1, 0x3C, 0x14, 0x01, 0xDA}; // populated with correct address with sensors.getAddress(lowThermometer, 1)
 
 XBeeWithCallbacks  xbee;
 ZBExplicitTxRequest exp_tx = ZBExplicitTxRequest();
@@ -75,8 +72,6 @@ ZBExplicitTxRequest exp_tx = ZBExplicitTxRequest();
 #define ON_OFF_OUTPUT 0x0002
 //#define IAS_ZONE 0x0402
 
-
-
 // ieee high
 static const uint8_t shCmd[] = {'S', 'H'};
 // ieee low
@@ -89,12 +84,7 @@ static const uint8_t netCmd[] = {'M', 'Y'};
 static const uint8_t keyCmd[] = {'K', 'Y'};
 
 uint8_t netAddr[2];
-
-//uint8_t frameID;
 uint8_t seqID;
-
-auto timer = timer_create_default(); // create a timer with default settings
-
 uint8_t t_payload[25] = {};
 /*
   typedef struct {
@@ -104,6 +94,8 @@ uint8_t t_payload[25] = {};
   uint8_t type;
   } attribute;
 */
+
+auto timer = timer_create_default(); // create a timer with default settings
 
 LocalMac macAddr = LocalMac(0);
 

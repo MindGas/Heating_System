@@ -1,21 +1,28 @@
 void zbTxStatusResp(ZBTxStatusResponse& resp, uintptr_t) {
   if (resp.isSuccess()) {
-    nss.println(F("TX OK"));
-
+    if (DEBUG) {
+      if (DEBUGlv2) {
+        nss.println(F("!! TX OK"));
+      }
+    }
   }
   else {
-    nss.print(F("TX FAIL: "));
-    nss.println(resp.getDeliveryStatus(), HEX);
+    if (DEBUG) {
+      if (DEBUGlv2) {
+        nss.print(F("!! TX FAIL: "));
+        nss.println(resp.getDeliveryStatus(), HEX);
+      }
+    }
 
-    //if (resp.getFrameId() == cmd_frame_id) {
-      //last_command();
-    //}
+    if (resp.getFrameId() == cmd_frame_id) {
+      last_command();
+    }
   }
 }
 
 
 void modemResp(ModemStatusResponse& resp, uintptr_t) {
-  nss.print(F("Modem Status: "));
+  nss.print(F("!! Modem Status: "));
   
   if (resp.getStatus() == 0) {
     nss.println("Hardware Reset");
@@ -35,7 +42,9 @@ void otherResp(XBeeResponse& resp, uintptr_t) {
 
 
 void atCmdResp(AtCommandResponse& resp, uintptr_t) {
-  nss.print(F("  AT command: "));
+  if (DEBUG) {
+    nss.print(F("  AT command: "));
+  }
   
   if (resp.getStatus() == AT_OK) {
     if (resp.getCommand()[0] == assocCmd[0] &&
@@ -52,7 +61,7 @@ void atCmdResp(AtCommandResponse& resp, uintptr_t) {
           case 0:
             nss.println("Successful");
             break;
-          // running out of memory
+          // Arduino Uno running out of memory, slimming debugging code
           /*case 33:
             nss.println("Scan found no PANs");
             break;
@@ -174,13 +183,15 @@ void zdoReceive(ZBExplicitRxResponse& erx, uintptr_t) {
   cmd_seq_id = erx.getFrameData()[erx.getDataOffset() + 1];
 
   if (erx.getRemoteAddress16() == 0 ) {
-    if (DEBUGlv2) {
-      nss.print(F("Received ZDO: "));
-      nss.println(erx.getClusterId(), HEX);
+    if (DEBUG) {
+      if (DEBUGlv2) {
+        nss.print(F("-> Received ZDO: "));
+        nss.println(erx.getClusterId(), HEX);
+      }
     }
     if (erx.getClusterId() == ACTIVE_EP_RQST) {
       //Have to match sequence number in response
-      cmd_seq_id = erx.getFrameData()[erx.getDataOffset()]; ///////// cmd_seq_id = erx.getFrameData()[erx.getDataOffset() + 1];     ????
+      cmd_seq_id = erx.getFrameData()[erx.getDataOffset()];
       if (DEBUG) {
         nss.print("-> Received Active Enpoint Request: ");
         print_hex(erx.getFrameData(), erx.getFrameDataLength());
@@ -203,8 +214,6 @@ void zdoReceive(ZBExplicitRxResponse& erx, uintptr_t) {
       sendSimpleDescRpt(ep);
     }
     else if (erx.getClusterId() == ON_OFF_CLUSTER_ID) {
-      //uint8_t len_data = erx.getDataLength() - 3;
-      //uint16_t attr_rqst[len_data / 2];
       if (DEBUG) {
         nss.print("-> Received On/Off Cluster Request for EP");
         nss.print(ep, HEX);
@@ -212,9 +221,6 @@ void zdoReceive(ZBExplicitRxResponse& erx, uintptr_t) {
         print_hex(erx.getFrameData(), erx.getFrameDataLength());
         nss.println("");
       }
-      //cmd_seq_id = erx.getFrameData()[erx.getDataOffset() + 1];
-      //uint8_t ep = erx.getDstEndpoint();
-      //uint8_t cmd_id = erx.getFrameData()[erx.getDataOffset() + 2];
       Endpoint end_point = GetEndpoint(ep);
       if (cmd_id == 0x00) {
         SetAttr(ep, erx.getClusterId(), 0x0000, 0x00);
@@ -223,24 +229,18 @@ void zdoReceive(ZBExplicitRxResponse& erx, uintptr_t) {
         SetAttr(ep, erx.getClusterId(), 0x0000, 0x01);
       }
       else {
-        if (DEBUGlv2) {
-          // Command B looks like acknoledgment. No use for it now
-          nss.print(F("     Received Unknown On/Off Cluster Command ("));
-          nss.print(cmd_id, HEX);
-          nss.print(F(") for EP"));
-          nss.println(ep, HEX);
+        if (DEBUG) {
+          if (DEBUGlv2) {
+            // Command B looks like acknowledgment. No use for it now
+            nss.print(F("     Received Unknown On/Off Cluster Command ("));
+            nss.print(cmd_id, HEX);
+            nss.print(F(") for EP"));
+            nss.println(ep, HEX);
+          }
         }
       }
     }
-
-
     else if (erx.getClusterId() == TEMP_CLUSTER_ID) {
-      //uint8_t len_data = erx.getDataLength() - 3;
-      //uint16_t attr_rqst[len_data / 2];
-      //uint8_t ep = erx.getDstEndpoint();
-
-      //cmd_seq_id = erx.getFrameData()[erx.getDataOffset() + 1];
-      //uint8_t cmd_id = erx.getFrameData()[erx.getDataOffset() + 2];
       Endpoint end_point = GetEndpoint(ep);
       if (cmd_id == 0x00) {
         if (DEBUG) {
@@ -253,24 +253,19 @@ void zdoReceive(ZBExplicitRxResponse& erx, uintptr_t) {
         sendAttributeRsp(erx.getClusterId(), readTemp(ep), ep, erx.getSrcEndpoint(), 0x01);
       }
       else {
-        if (DEBUGlv2) {
-          // Command B looks like acknoledgment. No use for it now
-          nss.print("-> Received Unknown Temperature Cluster Command (");
-          nss.print(cmd_id, HEX);
-          nss.print(F(") for EP"));
-          nss.println(ep, HEX);
-        }
-        if (DEBUGlv2) {
-          nss.print(F("     Received ZDO Frame: "));
-          print_hex(erx.getFrameData(), erx.getFrameDataLength());
-          nss.println("");
+        if (DEBUG) {
+          if (DEBUGlv2) {
+            // Command B looks like acknowledgment. No use for it now
+            nss.print("-> Received Unknown Temperature Cluster Command (");
+            nss.print(cmd_id, HEX);
+            nss.print(F(") for EP"));
+            nss.println(ep, HEX);
+          }
         }
       }
     }
     else if (erx.getClusterId() == BASIC_CLUSTER_ID) {
       if (cmd_id == 0x00) {
-        //uint8_t len_data = erx.getDataLength() - 3;
-  
         Endpoint end_point = GetEndpoint(ep);
         uint8_t i = erx.getDataOffset() + 3;
         uint16_t attr_rqst = (erx.getFrameData()[i + 1] << 8) |
@@ -283,29 +278,27 @@ void zdoReceive(ZBExplicitRxResponse& erx, uintptr_t) {
           nss.print(F(": "));
           print_hex(erx.getFrameData(), erx.getFrameDataLength());
           nss.println();
-        }
-        if (DEBUGlv2) {
-          nss.print("attr ID: ");
-          nss.println(attr_rqst);
-          nss.print("CMD ID: ");
-          nss.println(cmd_id, HEX);
-          nss.print("Data Offset: ");
-          nss.println(erx.getDataOffset(), HEX);
+
+          if (DEBUGlv2) {
+            nss.print("attr ID: ");
+            nss.println(attr_rqst);
+            nss.print("CMD ID: ");
+            nss.println(cmd_id, HEX);
+            nss.print("Data Offset: ");
+            nss.println(erx.getDataOffset(), HEX);
+          }
         }
         sendAttributeRsp(erx.getClusterId(), attr, ep, erx.getSrcEndpoint(), 0x01);
       }
       else {
-        if (DEBUGlv2) {
-          // Command B looks like acknoledgment. No use for it now
-          nss.print("-> Received Unknown Basic Cluster Command (");
-          nss.print(cmd_id, HEX);
-          nss.print(F(") for EP"));
-          nss.println(ep, HEX);
-        }
-        if (DEBUGlv2) {
-          nss.print(F("     Received ZDO Frame: "));
-          print_hex(erx.getFrameData(), erx.getFrameDataLength());
-          nss.println("");
+        if (DEBUG) {
+          if (DEBUGlv2) {
+            // Command B looks like acknowledgment. No use for it now
+            nss.print("-> Received Unknown Basic Cluster Command (");
+            nss.print(cmd_id, HEX);
+            nss.print(F(") for EP"));
+            nss.println(ep, HEX);
+          }
         }
       }
     }
