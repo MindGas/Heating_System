@@ -1,7 +1,9 @@
 # XBee Heating System for Home Assistant
  ZigBee-Arduino heating system controls for Home Assistant with ZHA integration.
  
- This is a work in progress for central home and hot water heating system. Two thermometers are used to check hot water boiler temperature at high and low points and send this information to Home Assistant over the ZigBee network. This temperature information then can be used in automations or creating new sensors. Another functionality is to turn on/off the electric water heater and central gas heating with two relays. Previously I have implemented this with different radios. Changing to ZigBee protocol to improve reliability and lessen maintenance by getting rid of another integration.
+ This is a work in progress for central home and hot water heating system. Two thermometers are used to check hot water boiler temperature at high and low points and send this information to Home Assistant over the ZigBee network. This temperature information then can be used in automations or creating new sensors. Another functionality is to turn on/off the electric water heater and central gas heating with two relays. Previously I have implemented this with different radios. Changing to ZigBee protocol to improve reliability and lessen maintenance by getting rid of another integration.  
+ 
+ For prototyping/debugging setup nano needs to be flashed with /DebugDeviceCode/SoftwareSerialExample.ino sketch.
  
  Forked/reworked from [GitHub Gist prairiesnpr/water_heater.ino](https://gist.github.com/prairiesnpr/7a40b78e765044252a4799d328327f0a)
  
@@ -11,7 +13,9 @@
  - [x] ~~Improve initialization (pairing) logic. Basic Cluster attribute sent twice.~~ (Got rid of the loop)
  - [x] ~~Relay safety feature. Turn off relays if no status update within 1 minute.~~ (timer checks if relay status was received every 1 min)
  - [x] ~~3 on/off endpoints shows up in Home Assistant while only 2 defined.~~ (wrong number of clusters were defined for some of the EPs)
- - [ ] Clean up code
+ - [x] ~~Clean up code~~
+ - [x] ~~Added status LEDs. One for Power On, two for both relay on/off status.~~
+ - [ ] So far so good. Testing in production mode.
  
  ## Hardware:
   Prototyping:
@@ -26,6 +30,21 @@
  Prototyping / Debugging Setup:
  
 ![Protopyping setup](https://github.com/MindGas/Heating_System/blob/main/images/XBee_Heating_System_Prototyping.jpg?raw=true)
+
+  Production:
+ * Digi XBee S2C (XB24C)
+ * Nano IO shield
+ * Arduino Nano
+ * Tempereture Sensor DS18B20 x2
+ * Resistor 4.7kΩ
+ * Resistor 22kΩ x3
+ * LED x3
+ * Relay x2
+ * 12V Power Supply
+
+ Production Setup:
+ 
+![Production setup](https://github.com/MindGas/Heating_System/blob/main/images/XBee_Heating_System_Production.jpg?raw=true)
  
  ## XBee Parameters
  XBee needs to be configured before it can be used. Use Digi XCTU software to configure it. Not all parameters below are required and some could have other values, but this works for me. Parameters in bold are required with suggested values.

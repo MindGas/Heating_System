@@ -12,7 +12,9 @@
 
 
 void setup() {
-  digitalWrite(SSR_PIN, HIGH);
+  digitalWrite(PWR_PIN, HIGH);
+  digitalWrite(HRL_PIN, LOW);
+  digitalWrite(WRL_PIN, LOW);
   Serial.begin(9600);
 
   if (DEBUG) {
@@ -51,7 +53,9 @@ void setup() {
   sensors.setResolution(highThermometer, 9);
   sensors.setResolution(lowThermometer, 9);
 
-  pinMode(SSR_PIN, OUTPUT);
+  pinMode(PWR_PIN, OUTPUT);
+  pinMode(HRL_PIN, OUTPUT);
+  pinMode(WRL_PIN, OUTPUT);
 
   delay(2000);
 

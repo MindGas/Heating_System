@@ -471,9 +471,11 @@ void SetAttr(uint8_t ep_id, uint16_t cluster_id, uint16_t attr_id, uint8_t value
     if (value == 0x00) {
       if (ep_id == 0x01) {
         digitalWrite(HR_PIN, RELAY_OFF);
+        digitalWrite(HRL_PIN, LOW);
       }
       else if (ep_id == 0x02) {
         digitalWrite(WR_PIN, RELAY_OFF);
+        digitalWrite(WRL_PIN, LOW);
       }
       if (DEBUG) {
         if (DEBUGlv2) {
@@ -481,14 +483,15 @@ void SetAttr(uint8_t ep_id, uint16_t cluster_id, uint16_t attr_id, uint8_t value
           nss.println(end_point.id);
         }
       }
-      digitalWrite(SSR_PIN, LOW);
     }
     else if (value == 0x01) {
       if (ep_id == 0x01) {
         digitalWrite(HR_PIN, RELAY_ON);
+        digitalWrite(HRL_PIN, HIGH);
       }
       else if (ep_id == 0x02) {
         digitalWrite(WR_PIN, RELAY_ON);
+        digitalWrite(WRL_PIN, HIGH);
       }
       if (DEBUG) {
         if (DEBUGlv2) {
@@ -496,7 +499,6 @@ void SetAttr(uint8_t ep_id, uint16_t cluster_id, uint16_t attr_id, uint8_t value
           nss.println(end_point.id);
         }
       }
-      digitalWrite(SSR_PIN, HIGH);
     }
   }
   sendAttributeWriteRsp(cluster_id, attr, ep_id, 0x01, value);

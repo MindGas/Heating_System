@@ -61,7 +61,7 @@ void atCmdResp(AtCommandResponse& resp, uintptr_t) {
           case 0:
             nss.println("Successful");
             break;
-          // Arduino Uno running out of memory, slimming debugging code
+          // Arduino running out of memory, slimming debugging code
           /*case 33:
             nss.println("Scan found no PANs");
             break;

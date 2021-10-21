@@ -1,11 +1,13 @@
 // Enable debug prints to serial monitor
-#define DEBUG true
+#define DEBUG false
 #define DEBUGlv2 false // extra debugging output over softserial.
 
 #define WATER_TEMP_BUS 7  // Tempetature sensor pin
-#define SSR_PIN LED_BUILTIN // LED for Relay On/Off state
 #define HR_PIN 5 // Central Heating Relay On/Off pin
 #define WR_PIN 6 // Water Heating Relay On/Off pin
+#define PWR_PIN 13 // LED for PWR state (LED_BUILTIN)
+#define HRL_PIN 12 // LED for Central Heating Relay On/Off state
+#define WRL_PIN 11 // LED for Water Heating Relay On/Off state
 #define NUM_ENDPOINTS 4   // Number of EndPoints (2x Temperature, 2x Switch)
 
 #define RELAY_ON 1  // GPIO value to write to turn on attached relay
