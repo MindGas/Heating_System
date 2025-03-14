@@ -1,7 +1,7 @@
 # XBee Heating System for Home Assistant
  ZigBee-Arduino heating system controls for Home Assistant with ZHA integration.
  
- This is a work in progress for central home and hot water heating system. Two thermometers are used to check hot water boiler temperature at high and low points and send this information to Home Assistant over the ZigBee network. This temperature information then can be used in automations or creating new sensors. Another functionality is to turn on/off the electric water heater and central gas heating with two relays. Previously I have implemented this with different radios. Changing to ZigBee protocol to improve reliability and lessen maintenance by getting rid of another integration.  
+ This was deploied for 4 years and counting. Solid solution with no issues for central home and hot water heating system. Two thermometers are used to check hot water boiler temperature at high and low points and send this information to Home Assistant over the ZigBee network. This temperature information then can be used in automations or creating new sensors. Another functionality is to turn on/off the electric water heater and central gas heating with two relays. Previously I have implemented this with different radios. Changing to ZigBee protocol to improve reliability and lessen maintenance by getting rid of another integration.  
  
  For prototyping/debugging setup nano needs to be flashed with /DebugDeviceCode/SoftwareSerialExample.ino sketch.
  
@@ -15,7 +15,7 @@
  - [x] ~~3 on/off endpoints shows up in Home Assistant while only 2 defined.~~ (wrong number of clusters were defined for some of the EPs)
  - [x] ~~Clean up code~~
  - [x] ~~Added status LEDs. One for Power On, two for both relay on/off status.~~
- - [ ] So far so good. Testing in production mode.
+ - [x] So far so good. Testing in production mode. 4 Years without issues
  
  ## Hardware:
   Prototyping:
